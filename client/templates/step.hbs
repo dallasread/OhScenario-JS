@@ -1,0 +1,78 @@
+<div class="step editing" data-id="{{id}}" data-action="{{action}}">
+    <p class="remove-step"><i class="fa fa-trash"></i></p>
+
+    <p class="state">
+        <i class="fa fa-ellipsis-h step-waiting"></i>
+        <i class="fa fa-check step-editing"></i>
+        <i class="fa fa-check step-success"></i>
+        <i class="fa fa-times step-error"></i>
+        <i class="fa fa-spinner fa-spin step-running"></i>
+    </p>
+
+    <p class="has-select">
+        <span class="select-target">{{capitalize action}}</span><span class="ing">ing</span>
+
+        <select name="action">
+            <option {{#is action 'visit'}}selected="selected"{{/is}} data-value="Visit" value="visit">Visit</option>
+            <option {{#is action 'click'}}selected="selected"{{/is}} data-value="Click" value="click">Click</option>
+            <option {{#is action 'fill'}}selected="selected"{{/is}} data-value="Fill" value="fill">Fill</option>
+            <option {{#is action 'assert'}}selected="selected"{{/is}} data-value="Assert" value="assert">Assert</option>
+        </select>
+    </p>
+
+    {{#is action 'visit'}}
+        <p class="target has-editable">"<span class="editable" name="target" contenteditable>{{target}}</span>"</p>
+    {{/is}}
+
+    {{#is action 'click'}}
+        <p class="target has-editable">"<span class="editable" name="target" contenteditable>{{target}}</span>"</p>
+    {{/is}}
+
+    {{#is action 'fill'}}
+        <p class="target has-editable">"<span class="editable" name="target" contenteditable>{{target}}</span>"</p>
+
+        <p>with</p>
+
+        <p class="value has-editable">"<span class="editable" name="value" contenteditable>{{value}}</span>"</p>
+    {{/is}}
+
+    {{#is action 'assert'}}
+        <p class="target has-editable">"<span class="editable" name="target" contenteditable>{{target}}</span>"</p>
+
+        <p class="has-select">
+            <span class="select-target">
+                {{#if attribute}}
+                    {{attribute}}
+                {{else}}
+                    content
+                {{/if}}
+            </span>
+
+            <select name="attribute">
+                <option {{#isnt attribute 'value'}}selected="selected"{{/isnt}} value="content">Content</option>
+                <option {{#is attribute 'value'}}selected="selected"{{/is}} value="value">Value</option>
+            </select>
+        </p>
+
+        <p class="has-select">
+            <span class="select-target">
+                {{#if matcher}}
+                    {{matcher}}
+                {{else}}
+                    is
+                {{/if}}
+            </span>
+
+            <select name="matcher">
+                <option {{#isnt matcher 'is not'}}{{#isnt matcher 'contains'}}{{#isnt matcher 'does not contain'}}selected="selected"{{/isnt}}{{/isnt}}{{/isnt}} value="is">Is</option>
+                <option {{#is matcher 'is not'}}selected="selected"{{/is}} value="is not">Is Not</option>
+                <option {{#is matcher 'contains'}}selected="selected"{{/is}} value="contains">Contains</option>
+                <option {{#is matcher 'does not contain'}}selected="selected"{{/is}} value="does not contain">Does Not Contain</option>
+            </select>
+        </p>
+
+        <p class="value has-editable">"<span class="editable" name="value" contenteditable>{{value}}</span>"</p>
+    {{/is}}
+
+    <p class="error"></p>
+</div>

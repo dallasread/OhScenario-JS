@@ -1,0 +1,15 @@
+<div class="scenario editing">
+    <div class="steps">
+        {{#each steps}}
+            {{> step}}
+        {{/each}}
+    </div>
+
+    <button class="add-step button"><i class="fa fa-plus-sign"></i> Add Step</button>
+
+    <div class="actions">
+        <button class="edit-scenario button">Make Changes</button>
+        <button class="run-scenario button">Run Test <span class="again">Again</span></button>
+        <button class="save-scenario button">Save Test for Later</button>
+    </div>
+</div>
