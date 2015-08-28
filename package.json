@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "browserify": "^11.0.1",
+    "generate-js": "^2.1.1",
     "generate-js-custom-element": "0.0.4",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",

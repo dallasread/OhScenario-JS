@@ -74,9 +74,9 @@ var CustomElement = require('generate-js-custom-element'),
                         name = $el.attr('name');
 
                     _.steps[id][name] = $el.val();
-                    _.renderStep(id);
+                    step = _.renderStep(id);
 
-                    _.$element.find('.step[data-id="' + id + '"]').find('select[name="' + name + '"]').get(0).focus();
+                    step.find('select[name="' + name + '"]').get(0).focus();
                 }
             },
             keydown: {
@@ -136,6 +136,7 @@ var Scenario = CustomElement.generate(function Scenario($element, options) {
     _.steps = _.steps || {};
 
     for (var key in steps) {
+        steps[key].id = key;
         _.addStep(steps[key]);
     }
 
@@ -151,8 +152,8 @@ Scenario.definePrototype({
         _.$element.find('select').change();
         _.$element.find('.scenario').attr('class', 'scenario running');
         _.$element.find('.step').attr('class', 'step waiting');
+        _.$element.find('.steps .step:first-child').attr('class', 'step running');
         _.$element.find('[contenteditable]').removeAttr('contenteditable');
-        _.$element.find('.step:first-child').attr('class', 'step running');
 
         console.log('Running Scenario', _.toJSON());
 
@@ -225,10 +226,15 @@ Scenario.definePrototype({
 
     renderStep: function renderStep(id) {
         var _ = this,
-            step = _.steps[id],
-            html = $(_.templates.step(step));
+            step = _.steps[id];
+
+        step.id = id;
+
+        var html = $(_.templates.step(step));
 
         _.$element.find('.step[data-id="' + id + '"]').replaceWith( html );
+
+        return html;
     },
 
     removeStep: function removeStep(id) {
@@ -241,10 +247,6 @@ Scenario.definePrototype({
     edit: function edit() {
         var _ = this;
 
-        if (_.socket) {
-            _.socket.emit('quit');
-        }
-
         _.render();
         _.$element.find('select').get(0).focus();
     },
@@ -254,12 +256,8 @@ Scenario.definePrototype({
 
         return {
             steps: _.steps,
-            options: {
-                desiredCapabilities: {
-                    browserName: 'firefox'
-                },
-                delay: 500
-            }
+            delay: 500,
+            browser: 'firefox'
         };
     },
 });
