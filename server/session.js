@@ -34,8 +34,9 @@ var Session = Generator.generate(function Session(socket) {
     });
 
     _.socket.on('quit', function quitDriver(done) {
-        _.quit();
-        done && done();
+        _.quit(function() {
+            done && done();
+        });
     });
 });
 

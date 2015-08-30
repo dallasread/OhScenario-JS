@@ -248,8 +248,11 @@ Scenario.definePrototype({
     edit: function edit() {
         var _ = this;
 
+        _.$element.css('opacity', 0.5);
         _.render();
+
         _.socket.emit('quit', function() {
+            _.$element.css('opacity', '');
             _.render();
             _.$element.find('select').get(0).focus();
         });
