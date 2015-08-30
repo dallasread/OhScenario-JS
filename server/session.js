@@ -10,17 +10,14 @@ var Session = Generator.generate(function Session(socket) {
     });
 
     _.socket.on('scenario-start', function scenarioStart(scenario) {
-        var step, key, phantom;
+        var step, key;
 
         _.quit(function() {
             _.scenario = scenario;
 
-            phantom = require('phantomjs-server');
-            phantom.start();
-
             _.driver = new webdriver
                 .Builder()
-                .usingServer(phantom.address())
+                .usingServer(_.socket.phantom.address())
                 .withCapabilities({ 'browserName': 'phantomjs' })
                 .build();
 

@@ -48,15 +48,6 @@ var CustomElement = require('generate-js-custom-element'),
                     $el.removeClass('hover');
                 }
             },
-            change: {
-                event: 'change keyup',
-                target: '.editing .has-select select',
-                listener: function focus(e, $el) {
-                    var selected = $el.find('option').not(function(){ return !this.selected; }),
-                        value = selected.attr('data-value') || selected.attr('value');
-                    $el.closest('.has-select').find('.select-target').text(value);
-                }
-            },
             blur: {
                 event: 'blur',
                 target: '.editing select',
@@ -66,17 +57,23 @@ var CustomElement = require('generate-js-custom-element'),
             },
             action: {
                 event: 'change',
-                target: '.editing select',
+                target: '.editing .has-select select',
                 listener: function act(e, $el) {
                     var _ = this,
                         step = $el.closest('.step'),
                         id = step.attr('data-id'),
-                        name = $el.attr('name');
+                        name = $el.attr('name'),
+                        selected = $el.find('option').not(function(){ return !this.selected; }),
+                        textValue = selected.attr('data-value') || selected.val(),
+                        select;
 
                     _.steps[id][name] = $el.val();
-                    step = _.renderStep(id);
 
-                    step.find('select[name="' + name + '"]').get(0).focus();
+                    step = _.renderStep(id);
+                    select = step.find('select[name="' + name + '"]');
+
+                    select.closest('.has-select').find('.select-target').text(textValue);
+                    select.get(0).focus();
                 }
             },
             keydown: {
@@ -150,7 +147,10 @@ Scenario.definePrototype({
         var _ = this,
             step;
 
-        _.$element.find('select').change();
+        _.$element.find('select').each(function() {
+            config.interactions.action.listener.call(_, null, $(this));
+        });
+
         _.$element.find('.scenario').attr('class', 'scenario running');
         _.$element.find('.step').attr('class', 'step waiting');
         _.$element.find('.steps .step:first-child').attr('class', 'step running');
@@ -168,6 +168,8 @@ Scenario.definePrototype({
         _.socket.on('disconnect', function(){
             _.socket.off();
             _.socket = null;
+            alert('Something went wrong. The test did not complete.');
+            _.render();
         });
 
         _.socket.once('connect', function() {
@@ -182,30 +184,36 @@ Scenario.definePrototype({
 
         _.socket.on('step-finish', function(err, data) {
             console.log('step-finish ~>', err, data);
+            var scenario = _.$element.find('.scenario');
 
-            step = _.$element.find('.step[data-id="' + data.id + '"]');
+            if (scenario.hasClass('running')) {
+                step = _.$element.find('.step[data-id="' + data.id + '"]');
 
-            if (err) {
-                switch (err) {
-                case 'NoSuchElementError':
-                    err = 'The element "' + data.target + '" was not found on the page.';
-                    break;
-                case 'InvalidSelectorError':
-                    err += ': Not sure what this one means!';
-                    break;
+                if (err) {
+                    switch (err) {
+                    case 'NoSuchElementError':
+                        err = 'The element "' + data.target + '" was not found on the page.';
+                        break;
+                    case 'InvalidSelectorError':
+                        err += ': Not sure what this one means!';
+                        break;
+                    }
+
+                    step.attr('class', 'step error');
+                    step.find('.error').text(err);
+                } else {
+                    step.attr('class', 'step success');
                 }
-
-                step.attr('class', 'step error');
-                step.find('.error').text(err);
-            } else {
-                step.attr('class', 'step success');
             }
         });
 
         _.socket.on('scenario-finish', function(err, data) {
             console.log('scenario-finish ~>', err, data);
             var scenario = _.$element.find('.scenario');
-            scenario.attr('class', 'scenario success');
+
+            if (scenario.hasClass('running')) {
+                scenario.attr('class', 'scenario success');
+            }
         });
     },
 
@@ -248,14 +256,17 @@ Scenario.definePrototype({
     edit: function edit() {
         var _ = this;
 
-        _.$element.css('opacity', 0.5);
         _.render();
 
-        _.socket.emit('quit', function() {
-            _.$element.css('opacity', '');
-            _.render();
-            _.$element.find('select').get(0).focus();
-        });
+        if (_.socket) {
+            _.$element.css('opacity', 0.5);
+
+            _.socket.emit('quit', function() {
+                _.$element.css('opacity', 1);
+                _.render();
+                _.$element.find('select').get(0).focus();
+            });
+        }
     },
 
     toJSON: function toJSON() {

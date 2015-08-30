@@ -2,17 +2,27 @@ var app = require('http').createServer(),
     io = require('socket.io')(app),
     Session = require('./session');
 
-app.listen(8111);
+app.listen(80);
 
 var Generator = require('generate-js');
 
-var App = Generator.generate(function App() {});
+var App = Generator.generate(function App() {
+    var _ = this;
+
+    _.defineProperties({
+        phantom: require('phantomjs-server')
+    });
+});
 
 App.definePrototype({
     init: function init() {
         var _ = this;
 
+        _.phantom.start();
+
         io.on('connection', function connection(socket) {
+            socket.phantom = _.phantom;
+
             Session.create(socket);
 
             io.on('disconnect', function disconnect() {
