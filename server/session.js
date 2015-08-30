@@ -73,6 +73,8 @@ Session.definePrototype({
                 _.stepComplete(null, step);
             }, function getError() {
                 _.stepComplete('Could not visit "' + step.target + '".', step);
+            }, function getCatch() {
+                _.stepComplete('Could not visit "' + step.target + '".', step);
             });
 
             break;
@@ -87,15 +89,21 @@ Session.definePrototype({
             break;
         case 'fill':
             _.findElement(step.target, function fillSuccess($el) {
-                $el.sendKeys(step.value);
-                _.stepComplete(null, step);
+                $el.getAttribute('type').then(function(type) {
+                    if (type !== 'hidden') {
+                        $el.sendKeys(step.value);
+                        _.stepComplete(null, step);
+                    } else {
+                        _.stepComplete('The target field, "' + step.target + '", is hidden.', step);
+                    }
+                });
             }, function fillError() {
                 _.stepComplete('Could not find "' + step.target + '".', step);
             });
 
             break;
         case 'assert':
-            _.findElement(step.target, function($el) {
+            _.findElement(step.target, function assertSuccess($el) {
                 var attribute;
 
                 switch (step.attribute) {
@@ -106,12 +114,14 @@ Session.definePrototype({
                     attribute = $el.getText();
                     attribute.then(function(value) {
                         _.compareAttribute(step, value);
-                    });
+                    }, function() {
+                        _.stepComplete('Could not find "' + step.target + '".', step);
+                    }).thenCatch(function() {});
                     break;
                 default:
                     _.stepComplete('No attribute supplied.', step);
                 }
-            }, function() {
+            }, function assertError() {
                 _.stepComplete('Could not find "' + step.target + '".', step);
             });
             break;
@@ -122,9 +132,9 @@ Session.definePrototype({
         var _ = this,
             $el = _.driver.findElement({ css: target });
 
-        $el.then(function() {
+        $el.then(function foundElement() {
             success($el);
-        }, error);
+        }).thenCatch(function() {});
     },
 
     compareAttribute: function compareAttribute(step, value) {

@@ -166,9 +166,9 @@ Scenario.definePrototype({
         _.socket = SocketIO(_.url);
 
         _.socket.on('disconnect', function(){
+            alert('Something went wrong. The test did not complete.');
             _.socket.off();
             _.socket = null;
-            alert('Something went wrong. The test did not complete.');
             _.render();
         });
 
