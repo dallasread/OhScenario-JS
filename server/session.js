@@ -134,7 +134,9 @@ Session.definePrototype({
 
         $el.then(function foundElement() {
             success($el);
-        }).thenCatch(function() {});
+        }).thenCatch(function() {
+            error && error();
+        });
     },
 
     compareAttribute: function compareAttribute(step, value) {
