@@ -2,7 +2,7 @@ var app = require('http').createServer(),
     io = require('socket.io')(app),
     Session = require('./session');
 
-app.listen(80);
+app.listen(8111);
 
 var Generator = require('generate-js');
 
