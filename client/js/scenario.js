@@ -249,7 +249,10 @@ Scenario.definePrototype({
         var _ = this;
 
         _.render();
-        _.$element.find('select').get(0).focus();
+        _.socket.emit('quit', function() {
+            _.render();
+            _.$element.find('select').get(0).focus();
+        });
     },
 
     toJSON: function toJSON() {
