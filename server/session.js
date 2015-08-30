@@ -10,14 +10,18 @@ var Session = Generator.generate(function Session(socket) {
     });
 
     _.socket.on('scenario-start', function scenarioStart(scenario) {
-        var step, key;
+        var step, key, phantom;
 
         _.quit(function() {
             _.scenario = scenario;
 
+            phantom = require('phantomjs-server');
+            phantom.start();
+
             _.driver = new webdriver
                 .Builder()
-                .forBrowser(_.scenario.browser || 'firefox')
+                .usingServer(phantom.address())
+                .withCapabilities({ 'browserName': 'phantomjs' })
                 .build();
 
             for (key in _.scenario.steps) {
@@ -42,10 +46,9 @@ Session.definePrototype({
 
         if (_.driver) {
             _.driver.close().then(function() {
+                _.driver = null;
                 done && done();
             });
-
-            _.driver = null;
         } else {
             done && done();
         }
@@ -181,7 +184,7 @@ Session.definePrototype({
             } else {
                 _.runNextStep();
             }
-        }, _.scenario.options && _.scenario.delay || 0);
+        }, _.scenario.delay || 0);
     },
 });
 

@@ -134,6 +134,7 @@ var Scenario = CustomElement.generate(function Scenario($element, options) {
 
     _.url = _.$element.attr('data-run');
     _.steps = _.steps || {};
+    _.delay = _.delay || 0;
 
     for (var key in steps) {
         steps[key].id = key;
@@ -256,8 +257,7 @@ Scenario.definePrototype({
 
         return {
             steps: _.steps,
-            delay: 500,
-            browser: 'firefox'
+            delay: _.delay
         };
     },
 });
